@@ -16,7 +16,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Collect response time of a TCP or UDP connection
-[[inputs.net_response]]
+[[inputs.deepmon_port]]
   ## Protocol, must be "tcp" or "udp"
   ## NOTE: because the "udp" protocol does not respond to requests, it requires
   ## a send/expect string pair (see below).
@@ -37,29 +37,21 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # send = "ssh"
   ## expected string in answer
   # expect = "ssh"
-
-  ## Uncomment to remove deprecated fields; recommended for new deploys
-  # fieldexclude = ["result_type", "string_found"]
 ```
 
 ## Metrics
 
 - net_response
   - tags:
-    - server
+    - domain
+  - fields:
+    - result
     - port
     - protocol
-    - result
-  - fields:
-    - response_time (float, seconds)
-    - result_code (int, success = 0, timeout = 1, connection_failed = 2, read_failed = 3, string_mismatch = 4)
-    - result_type (string) **DEPRECATED in 1.7; use result tag**
-    - string_found (boolean) **DEPRECATED in 1.4; use result tag**
+    - remote_addr
+    - response_time
+    - sended_packet_size
+    - expected_packet_size
+    - expected_string
+    - sended_string
 
-## Example Output
-
-```text
-net_response,port=8086,protocol=tcp,result=success,server=localhost response_time=0.000092948,result_code=0i,result_type="success" 1525820185000000000
-net_response,port=8080,protocol=tcp,result=connection_failed,server=localhost result_code=2i,result_type="connection_failed" 1525820088000000000
-net_response,port=8080,protocol=udp,result=read_failed,server=localhost result_code=3i,result_type="read_failed",string_found=false 1525820088000000000
-```

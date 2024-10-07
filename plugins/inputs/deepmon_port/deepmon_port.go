@@ -1,5 +1,5 @@
 //go:generate ../../../tools/readme_config_includer/generator
-package net_response
+package deepmon_port
 
 import (
 	"bufio"
@@ -247,7 +247,7 @@ func (n *NetResponse) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("net_response", func() telegraf.Input {
+	inputs.Add("deepmon_port", func() telegraf.Input {
 		return &NetResponse{}
 	})
 }
