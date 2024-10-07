@@ -22,6 +22,8 @@ import (
 //go:embed sample.conf
 var sampleConfig string
 
+var pluginName = monitors.MonitorTypes_DEEPMON_PORT.String()
+
 // NetResponse struct
 type NetResponse struct {
 	Address     string
@@ -242,12 +244,12 @@ func (n *NetResponse) Gather(acc telegraf.Accumulator) error {
 	// 	tags[k] = v
 	// }
 	// Add metrics
-	acc.AddFields("deepmon_port", tags.GetField(), tags.GetTag())
+	acc.AddFields(pluginName, tags.GetField(), tags.GetTag())
 	return nil
 }
 
 func init() {
-	inputs.Add("deepmon_port", func() telegraf.Input {
+	inputs.Add(pluginName, func() telegraf.Input {
 		return &NetResponse{}
 	})
 }

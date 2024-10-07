@@ -88,7 +88,7 @@ func TestTCPError(t *testing.T) {
 	// Gather
 	require.NoError(t, c.Gather(&acc))
 	acc.AssertContainsTaggedFields(t,
-		"deepmon_port",
+		pluginName,
 		data.GetField(), data.GetTag())
 }
 
@@ -133,7 +133,7 @@ func TestTCPOK1(t *testing.T) {
 		},
 	}
 	acc.AssertContainsTaggedFields(t,
-		"deepmon_port",
+		pluginName,
 		data.GetField(), data.GetTag())
 
 	// Waiting TCPserver
@@ -182,7 +182,7 @@ func TestTCPOK2(t *testing.T) {
 		},
 	}
 	acc.AssertContainsTaggedFields(t,
-		"deepmon_port",
+		pluginName,
 		data.GetField(), data.GetTag())
 	// Waiting TCPserver
 	wg.Wait()
@@ -222,7 +222,7 @@ func TestUDPError(t *testing.T) {
 		},
 	}
 	acc.AssertContainsTaggedFields(t,
-		"deepmon_port", data.GetField(), data.GetTag())
+		pluginName, data.GetField(), data.GetTag())
 }
 
 func TestUDPOK1(t *testing.T) {
@@ -267,7 +267,7 @@ func TestUDPOK1(t *testing.T) {
 		},
 	}
 	acc.AssertContainsTaggedFields(t,
-		"deepmon_port",
+		pluginName,
 		data.GetField(), data.GetTag())
 	// Waiting TCPserver
 	wg.Wait()
