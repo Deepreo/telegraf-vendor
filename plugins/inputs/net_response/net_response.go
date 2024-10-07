@@ -6,11 +6,13 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/textproto"
 	"regexp"
 	"time"
 
+	"github.com/Deepreo/MonitoringTime-Backend/pkg/monitors"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/config"
 	"github.com/influxdata/telegraf/internal/choice"
@@ -19,16 +21,6 @@ import (
 
 //go:embed sample.conf
 var sampleConfig string
-
-type ResultType uint64
-
-const (
-	Success          ResultType = 0
-	Timeout          ResultType = 1
-	ConnectionFailed ResultType = 2
-	ReadFailed       ResultType = 3
-	StringMismatch   ResultType = 4
-)
 
 // NetResponse struct
 type NetResponse struct {
@@ -46,10 +38,8 @@ func (*NetResponse) SampleConfig() string {
 
 // TCPGather will execute if there are TCP tests defined in the configuration.
 // It will return a map[string]interface{} for fields and a map[string]string for tags
-func (n *NetResponse) TCPGather() (map[string]string, map[string]interface{}, error) {
+func (n *NetResponse) TCPGather(fields *monitors.PortData) (err error) {
 	// Prepare returns
-	tags := make(map[string]string)
-	fields := make(map[string]interface{})
 	// Start Timer
 	start := time.Now()
 	// Connecting
@@ -60,18 +50,20 @@ func (n *NetResponse) TCPGather() (map[string]string, map[string]interface{}, er
 	if err != nil {
 		var e net.Error
 		if errors.As(err, &e) && e.Timeout() {
-			setResult(Timeout, fields, tags, n.Expect)
+			fields.Result = monitors.Timeout
 		} else {
-			setResult(ConnectionFailed, fields, tags, n.Expect)
+			fields.Result = monitors.ConnectionFailed
 		}
-		return tags, fields, nil
+		return nil
 	}
 	defer conn.Close()
 	// Send string if needed
 	if n.Send != "" {
 		msg := []byte(n.Send)
-		if _, gerr := conn.Write(msg); gerr != nil {
-			return nil, nil, gerr
+		if ln, gerr := conn.Write(msg); gerr != nil {
+			return gerr
+		} else {
+			fields.SendedPacketSize = ln //ln yazılan paket sayısı gönderilen byte kadar eğer yazılmazsa zaten hata dönüyor
 		}
 		// Stop timer
 		responseTime = time.Since(start).Seconds()
@@ -80,7 +72,7 @@ func (n *NetResponse) TCPGather() (map[string]string, map[string]interface{}, er
 	if n.Expect != "" {
 		// Set read timeout
 		if gerr := conn.SetReadDeadline(time.Now().Add(time.Duration(n.ReadTimeout))); gerr != nil {
-			return nil, nil, gerr
+			return gerr
 		}
 		// Prepare reader
 		reader := bufio.NewReader(conn)
@@ -88,83 +80,87 @@ func (n *NetResponse) TCPGather() (map[string]string, map[string]interface{}, er
 		// Read
 		data, err := tp.ReadLine()
 		// Stop timer
+		fields.ExpectedPacketSize = len(data) // Gelen datanın uzunluğunu expected (beklenen) datanın uzunluğu olarak yazdım.
 		responseTime = time.Since(start).Seconds()
 		// Handle error
 		if err != nil {
-			setResult(ReadFailed, fields, tags, n.Expect)
+			log.Println(err.Error())
+			fields.Result = monitors.ReadFailed
 		} else {
 			// Looking for string in answer
 			regEx := regexp.MustCompile(`.*` + n.Expect + `.*`)
 			find := regEx.FindString(data)
 			if find != "" {
-				setResult(Success, fields, tags, n.Expect)
+				fields.Result = monitors.Success
 			} else {
-				setResult(StringMismatch, fields, tags, n.Expect)
+				fields.Result = monitors.StringMismatch
 			}
 		}
 	} else {
-		setResult(Success, fields, tags, n.Expect)
+		fields.Result = monitors.Success
 	}
-	fields["response_time"] = responseTime
-	return tags, fields, nil
+	fields.RemoteAddr, _, _ = net.SplitHostPort(conn.RemoteAddr().String())
+	fields.ResponseTime = responseTime
+	return nil
 }
 
 // UDPGather will execute if there are UDP tests defined in the configuration.
 // It will return a map[string]interface{} for fields and a map[string]string for tags
-func (n *NetResponse) UDPGather() (map[string]string, map[string]interface{}, error) {
+func (n *NetResponse) UDPGather(fields *monitors.PortData) (err error) {
 	// Prepare returns
-	tags := make(map[string]string)
-	fields := make(map[string]interface{})
+
 	// Start Timer
 	start := time.Now()
 	// Resolving
 	udpAddr, err := net.ResolveUDPAddr("udp", n.Address)
 	// Handle error
 	if err != nil {
-		setResult(ConnectionFailed, fields, tags, n.Expect)
-		return tags, fields, nil
+		fields.Result = monitors.ConnectionFailed
+		return nil
 	}
 	// Connecting
 	conn, err := net.DialUDP("udp", nil, udpAddr)
 	// Handle error
 	if err != nil {
-		setResult(ConnectionFailed, fields, tags, n.Expect)
-		return tags, fields, nil
+		fields.Result = monitors.ConnectionFailed
+		return nil
 	}
 	defer conn.Close()
 	// Send string
 	msg := []byte(n.Send)
-	if _, gerr := conn.Write(msg); gerr != nil {
-		return nil, nil, gerr
+	if ln, gerr := conn.Write(msg); gerr != nil {
+		return gerr
+	} else {
+		fields.SendedPacketSize = ln
 	}
 	// Read string
 	// Set read timeout
 	if gerr := conn.SetReadDeadline(time.Now().Add(time.Duration(n.ReadTimeout))); gerr != nil {
-		return nil, nil, gerr
+		return gerr
 	}
 	// Read
 	buf := make([]byte, 1024)
-	_, _, err = conn.ReadFromUDP(buf)
+	ln, _, err := conn.ReadFromUDP(buf)
 	// Stop timer
+	// log.Println("DATA:", string(buf))
 	responseTime := time.Since(start).Seconds()
 	// Handle error
 	if err != nil {
-		setResult(ReadFailed, fields, tags, n.Expect)
-		return tags, fields, nil
+		fields.Result = monitors.ReadFailed
+		return nil
 	}
-
 	// Looking for string in answer
 	regEx := regexp.MustCompile(`.*` + n.Expect + `.*`)
 	find := regEx.FindString(string(buf))
 	if find != "" {
-		setResult(Success, fields, tags, n.Expect)
+		fields.Result = monitors.Success
 	} else {
-		setResult(StringMismatch, fields, tags, n.Expect)
+		fields.Result = monitors.StringMismatch
 	}
-
-	fields["response_time"] = responseTime
-
-	return tags, fields, nil
+	fields.ResponseTime = responseTime
+	fields.RemoteAddr, _, _ = net.SplitHostPort(conn.RemoteAddr().String())
+	fields.ExpectedPacketSize = ln
+	return nil
 }
 
 // Init performs one time setup of the plugin and returns an error if the
@@ -213,61 +209,41 @@ func (n *NetResponse) Gather(acc telegraf.Accumulator) error {
 		return err
 	}
 
+	fields := &monitors.PortData{}
+	tags := monitors.MonitorData[*monitors.PortData]{
+		Domain: host,
+		Data:   fields,
+	}
 	// Prepare data
-	tags := map[string]string{"server": host, "port": port}
-	var fields map[string]interface{}
-	var returnTags map[string]string
+	// tags := map[string]string{"server": host, "port": port}
+	// var fields map[string]interface{}
+	// var returnTags map[string]string
 
 	// Gather data
+	fields.Port = port
 	switch n.Protocol {
 	case "tcp":
-		returnTags, fields, err = n.TCPGather()
+		err = n.TCPGather(fields)
 		if err != nil {
 			return err
 		}
-		tags["protocol"] = "tcp"
+		fields.Protocol = "tcp"
 	case "udp":
-		returnTags, fields, err = n.UDPGather()
+		err = n.UDPGather(fields)
 		if err != nil {
 			return err
 		}
-		tags["protocol"] = "udp"
+		fields.Protocol = "udp"
 	}
-
+	fields.ExpectedString = n.Expect
+	fields.SendedString = n.Send
 	// Merge the tags
-	for k, v := range returnTags {
-		tags[k] = v
-	}
+	// for k, v := range returnTags {
+	// 	tags[k] = v
+	// }
 	// Add metrics
-	acc.AddFields("net_response", fields, tags)
+	acc.AddFields("deepmon_port", tags.GetField(), tags.GetTag())
 	return nil
-}
-
-func setResult(result ResultType, fields map[string]interface{}, tags map[string]string, expect string) {
-	var tag string
-	switch result {
-	case Success:
-		tag = "success"
-	case Timeout:
-		tag = "timeout"
-	case ConnectionFailed:
-		tag = "connection_failed"
-	case ReadFailed:
-		tag = "read_failed"
-	case StringMismatch:
-		tag = "string_mismatch"
-	}
-
-	tags["result"] = tag
-	fields["result_code"] = uint64(result)
-
-	// deprecated in 1.7; use result tag
-	fields["result_type"] = tag
-
-	// deprecated in 1.4; use result tag
-	if expect != "" {
-		fields["string_found"] = result == Success
-	}
 }
 
 func init() {
