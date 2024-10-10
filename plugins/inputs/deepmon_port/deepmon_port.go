@@ -244,7 +244,7 @@ func (n *NetResponse) Gather(acc telegraf.Accumulator) error {
 	// 	tags[k] = v
 	// }
 	// Add metrics
-	acc.AddFields(pluginName, tags.GetField(), tags.GetTag())
+	acc.AddFields(pluginName, tags.GetFields(), tags.GetTags())
 	return nil
 }
 

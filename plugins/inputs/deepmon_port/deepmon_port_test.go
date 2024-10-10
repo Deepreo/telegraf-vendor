@@ -89,7 +89,7 @@ func TestTCPError(t *testing.T) {
 	require.NoError(t, c.Gather(&acc))
 	acc.AssertContainsTaggedFields(t,
 		pluginName,
-		data.GetField(), data.GetTag())
+		data.GetFields(), data.GetTags())
 }
 
 func TestTCPOK1(t *testing.T) {
@@ -134,7 +134,7 @@ func TestTCPOK1(t *testing.T) {
 	}
 	acc.AssertContainsTaggedFields(t,
 		pluginName,
-		data.GetField(), data.GetTag())
+		data.GetFields(), data.GetTags())
 
 	// Waiting TCPserver
 	wg.Wait()
@@ -183,7 +183,7 @@ func TestTCPOK2(t *testing.T) {
 	}
 	acc.AssertContainsTaggedFields(t,
 		pluginName,
-		data.GetField(), data.GetTag())
+		data.GetFields(), data.GetTags())
 	// Waiting TCPserver
 	wg.Wait()
 }
@@ -222,7 +222,7 @@ func TestUDPError(t *testing.T) {
 		},
 	}
 	acc.AssertContainsTaggedFields(t,
-		pluginName, data.GetField(), data.GetTag())
+		pluginName, data.GetFields(), data.GetTags())
 }
 
 func TestUDPOK1(t *testing.T) {
@@ -268,7 +268,7 @@ func TestUDPOK1(t *testing.T) {
 	}
 	acc.AssertContainsTaggedFields(t,
 		pluginName,
-		data.GetField(), data.GetTag())
+		data.GetFields(), data.GetTags())
 	// Waiting TCPserver
 	wg.Wait()
 }
