@@ -727,6 +727,10 @@ github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241010122909-590
 github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241010122909-59039bd1e5c2/go.mod h1:b5xQVEC1O2M7XTBu+08hp62+aBr/LGON0Y9fWa67ZMo=
 github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241010151918-8d2727642904 h1:SZ8dHDPJF0LVfnm4PL/ts7LKuDgWfUHsBuBOCX7ZpvA=
 github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241010151918-8d2727642904/go.mod h1:b5xQVEC1O2M7XTBu+08hp62+aBr/LGON0Y9fWa67ZMo=
+github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241018104822-aae55476046f h1:lwhqSB9FF2m0XRXzbtLD9bVPpB7IaHt7riCb76Kd2C4=
+github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241018104822-aae55476046f/go.mod h1:b5xQVEC1O2M7XTBu+08hp62+aBr/LGON0Y9fWa67ZMo=
+github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241018134613-2de73b48cd90 h1:VFDdllfBUE6ngxy9t7EHnucvSzUGZ+s6ZO+RZllyxHE=
+github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241018134613-2de73b48cd90/go.mod h1:b5xQVEC1O2M7XTBu+08hp62+aBr/LGON0Y9fWa67ZMo=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2 h1:5IcZpTvzydCQeHzK4Ef/D5rrSqwxob0t8PQPMybUNFM=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2/go.mod h1:yDgFjdqOqDEKOvasDdhWNXYg9BVp4O+o5f6V/ehm6Oo=
 github.com/IBM/nzgo/v12 v12.0.9-0.20231115043259-49c27f2dfe48 h1:TBb4IxmBH0ssmWTUg0C6c9ZnfDmZospTF8f+YbHnbbA=
@@ -776,6 +780,8 @@ github.com/ProtonMail/gopenpgp/v2 v2.7.4 h1:Vz/8+HViFFnf2A6XX8JOvZMrA6F5puwNvvF2
 github.com/ProtonMail/gopenpgp/v2 v2.7.4/go.mod h1:IhkNEDaxec6NyzSI0PlxapinnwPVIESk8/76da3Ct3g=
 github.com/PuerkitoBio/goquery v1.8.1 h1:uQxhNlArOIdbrH1tr0UXwdVFgDcZDrZVdcpygAcwmWM=
 github.com/PuerkitoBio/goquery v1.8.1/go.mod h1:Q8ICL1kNUJ2sXGoAhPGUdYDJvgQgHzJsnnd3H7Ho5jQ=
+github.com/ResulCelik0/go-tld v0.0.0-20241018190038-f5ac0d86a8c7 h1:TvpsemY4GftLmQZuka09yNE3cSZuYVAMvoWRbUfnA8Q=
+github.com/ResulCelik0/go-tld v0.0.0-20241018190038-f5ac0d86a8c7/go.mod h1:krv2WU4IAN4wp+++1IVzl8XG8U5xEuWFzH27d/oZBKg=
 github.com/SAP/go-hdb v1.9.10 h1:Smi3w0y8G9DVxR4z+Tvow8AJNqQq1fdCCMwplyapvR4=
 github.com/SAP/go-hdb v1.9.10/go.mod h1:vxYDca44L2eRudZv5JAI6T+IygOfxb7vOCFh/Kj0pug=
 github.com/Unknwon/goconfig v1.0.0 h1:9IAu/BYbSLQi8puFjUQApZTxIHqSwrj5d8vpP8vTq4A=

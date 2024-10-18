@@ -22,7 +22,7 @@ require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/ClickHouse/clickhouse-go v1.5.4
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241010151918-8d2727642904
+	github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241018134613-2de73b48cd90
 	github.com/IBM/nzgo/v12 v12.0.9-0.20231115043259-49c27f2dfe48
 	github.com/IBM/sarama v1.43.2
 	github.com/Masterminds/semver/v3 v3.2.1
@@ -270,6 +270,7 @@ require (
 	github.com/Max-Sum/base32768 v0.0.0-20230304063302-18e6ce5945fd // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Microsoft/hcsshim v0.11.5 // indirect
+	github.com/ResulCelik0/go-tld v0.0.0-20241018190038-f5ac0d86a8c7 // indirect
 	github.com/abbot/go-http-auth v0.4.0 // indirect
 	github.com/alecthomas/participle v0.4.1 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
