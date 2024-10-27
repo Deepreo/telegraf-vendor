@@ -18,7 +18,8 @@ func TestBadProtocol(t *testing.T) {
 	// Init plugin
 	c := NetResponse{
 		Protocol: "unknownprotocol",
-		Address:  ":9999",
+		Domain:   "localhost",
+		Port:     "2004",
 	}
 	// Error
 	err := c.Init()
@@ -29,7 +30,8 @@ func TestBadProtocol(t *testing.T) {
 func TestNoPort(t *testing.T) {
 	c := NetResponse{
 		Protocol: "tcp",
-		Address:  ":",
+		Domain:   "localhost",
+		Port:     "",
 	}
 	err := c.Init()
 	require.Error(t, err)
@@ -39,23 +41,25 @@ func TestNoPort(t *testing.T) {
 func TestAddressOnly(t *testing.T) {
 	c := NetResponse{
 		Protocol: "tcp",
-		Address:  "127.0.0.1",
+		Domain:   "127.0.0.1",
 	}
 	err := c.Init()
 	require.Error(t, err)
-	require.Equal(t, "address 127.0.0.1: missing port in address", err.Error())
+	require.Equal(t, "bad port in config option address", err.Error())
 }
 
 func TestSendExpectStrings(t *testing.T) {
 	tc := NetResponse{
 		Protocol: "udp",
-		Address:  "127.0.0.1:7",
+		Domain:   "127.0.0.1",
+		Port:     "7",
 		Send:     "",
 		Expect:   "toast",
 	}
 	uc := NetResponse{
 		Protocol: "udp",
-		Address:  "127.0.0.1:7",
+		Domain:   "127.0.0.1",
+		Port:     "7",
 		Send:     "toast",
 		Expect:   "",
 	}
@@ -72,7 +76,8 @@ func TestTCPError(t *testing.T) {
 	// Init plugin
 	c := NetResponse{
 		Protocol: "tcp",
-		Address:  ":9999",
+		Domain:   "localhost",
+		Port:     "9999",
 		Timeout:  config.Duration(time.Second * 30),
 	}
 	data := monitors.MonitorData[*monitors.PortData]{
@@ -97,7 +102,8 @@ func TestTCPOK1(t *testing.T) {
 	var acc testutil.Accumulator
 	// Init plugin
 	c := NetResponse{
-		Address:     "localhost:2004",
+		Domain:      "localhost",
+		Port:        "2004",
 		Send:        "test",
 		Expect:      "test",
 		ReadTimeout: config.Duration(time.Second * 3),
@@ -145,7 +151,8 @@ func TestTCPOK2(t *testing.T) {
 	var acc testutil.Accumulator
 	// Init plugin
 	c := NetResponse{
-		Address:     "localhost:2004",
+		Domain:      "localhost",
+		Port:        "2004",
 		Send:        "test",
 		Expect:      "test2",
 		ReadTimeout: config.Duration(time.Second * 3),
@@ -192,7 +199,8 @@ func TestUDPError(t *testing.T) {
 	var acc testutil.Accumulator
 	// Init plugin
 	c := NetResponse{
-		Address:  "localhost:9999",
+		Domain:   "localhost",
+		Port:     "9999",
 		Send:     "test",
 		Expect:   "test",
 		Protocol: "udp",
@@ -230,7 +238,8 @@ func TestUDPOK1(t *testing.T) {
 	var acc testutil.Accumulator
 	// Init plugin
 	c := NetResponse{
-		Address:     "localhost:2004",
+		Domain:      "localhost",
+		Port:        "2004",
 		Send:        "test",
 		Expect:      "test",
 		ReadTimeout: config.Duration(time.Second * 3),

@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/textproto"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/Deepreo/MonitoringTime-Backend/pkg/monitors"
@@ -26,12 +27,13 @@ var pluginName = monitors.MonitorTypes_DEEPMON_PORT.String()
 
 // NetResponse struct
 type NetResponse struct {
-	Address     string
-	Timeout     config.Duration
-	ReadTimeout config.Duration
-	Send        string
-	Expect      string
-	Protocol    string
+	Domain      string          `toml:"domain"`
+	Port        string          `toml:"port"`
+	Timeout     config.Duration `toml:"timeout"`
+	ReadTimeout config.Duration `toml:"read_timeout"`
+	Send        string          `toml:"send"`
+	Expect      string          `toml:"expect"`
+	Protocol    string          `toml:"protocol"`
 }
 
 func (*NetResponse) SampleConfig() string {
@@ -45,7 +47,7 @@ func (n *NetResponse) TCPGather(fields *monitors.PortData) (err error) {
 	// Start Timer
 	start := time.Now()
 	// Connecting
-	conn, err := net.DialTimeout("tcp", n.Address, time.Duration(n.Timeout))
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(n.Domain, n.Port), time.Duration(n.Timeout))
 	// Stop timer
 	responseTime := time.Since(start).Seconds()
 	// Handle error
@@ -114,7 +116,7 @@ func (n *NetResponse) UDPGather(fields *monitors.PortData) (err error) {
 	// Start Timer
 	start := time.Now()
 	// Resolving
-	udpAddr, err := net.ResolveUDPAddr("udp", n.Address)
+	udpAddr, err := net.ResolveUDPAddr("udp", net.JoinHostPort(n.Domain, n.Port))
 	// Handle error
 	if err != nil {
 		fields.Result = monitors.ConnectionFailed
@@ -183,17 +185,13 @@ func (n *NetResponse) Init() error {
 		return errors.New("expected string cannot be empty")
 	}
 	// Prepare host and port
-	host, port, err := net.SplitHostPort(n.Address)
-	if err != nil {
-		return err
+	if n.Domain == "" {
+		return errors.New("domain cannot be empty")
 	}
-	if host == "" {
-		n.Address = "localhost:" + port
-	}
-	if port == "" {
+	port, err := strconv.Atoi(n.Port)
+	if err != nil || port < 1 || port > 65535 {
 		return errors.New("bad port in config option address")
 	}
-
 	if err := choice.Check(n.Protocol, []string{"tcp", "udp"}); err != nil {
 		return fmt.Errorf("config option protocol: %w", err)
 	}
@@ -206,14 +204,9 @@ func (n *NetResponse) Init() error {
 // also fill an Accumulator that is supplied.
 func (n *NetResponse) Gather(acc telegraf.Accumulator) error {
 	// Prepare host and port
-	host, port, err := net.SplitHostPort(n.Address)
-	if err != nil {
-		return err
-	}
-
 	fields := &monitors.PortData{}
 	tags := monitors.MonitorData[*monitors.PortData]{
-		Domain: host,
+		Domain: n.Domain,
 		Data:   fields,
 	}
 	// Prepare data
@@ -222,16 +215,16 @@ func (n *NetResponse) Gather(acc telegraf.Accumulator) error {
 	// var returnTags map[string]string
 
 	// Gather data
-	fields.Port = port
+	fields.Port = n.Port
 	switch n.Protocol {
 	case "tcp":
-		err = n.TCPGather(fields)
+		err := n.TCPGather(fields)
 		if err != nil {
 			return err
 		}
 		fields.Protocol = "tcp"
 	case "udp":
-		err = n.UDPGather(fields)
+		err := n.UDPGather(fields)
 		if err != nil {
 			return err
 		}
