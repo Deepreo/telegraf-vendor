@@ -22,7 +22,7 @@ require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/ClickHouse/clickhouse-go v1.5.4
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241018134613-2de73b48cd90
+	github.com/Deepreo/MonitoringTime-Backend/pkg/monitors v0.0.0-20241028103832-fa1393764371
 	github.com/IBM/nzgo/v12 v12.0.9-0.20231115043259-49c27f2dfe48
 	github.com/IBM/sarama v1.43.2
 	github.com/Masterminds/semver/v3 v3.2.1
@@ -30,6 +30,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/Mellanox/rdmamap v1.1.0
 	github.com/PaesslerAG/gval v1.2.2
+	github.com/ResulCelik0/go-tld v0.0.0-20241018190038-f5ac0d86a8c7
 	github.com/SAP/go-hdb v1.9.10
 	github.com/aerospike/aerospike-client-go/v5 v5.11.0
 	github.com/alecthomas/units v0.0.0-20240626203959-61d1e3462e30
@@ -135,6 +136,8 @@ require (
 	github.com/klauspost/pgzip v1.2.6
 	github.com/kolo/xmlrpc v0.0.0-20220921171641-a4b6fa1dd06b
 	github.com/leodido/go-syslog/v4 v4.1.0
+	github.com/likexian/whois v1.15.5
+	github.com/likexian/whois-parser v1.24.20
 	github.com/linkedin/goavro/v2 v2.13.0
 	github.com/logzio/azure-monitor-metrics-receiver v1.1.0
 	github.com/lxc/incus/v6 v6.2.0
@@ -270,7 +273,6 @@ require (
 	github.com/Max-Sum/base32768 v0.0.0-20230304063302-18e6ce5945fd // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Microsoft/hcsshim v0.11.5 // indirect
-	github.com/ResulCelik0/go-tld v0.0.0-20241018190038-f5ac0d86a8c7 // indirect
 	github.com/abbot/go-http-auth v0.4.0 // indirect
 	github.com/alecthomas/participle v0.4.1 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
@@ -396,6 +398,7 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/ragel-machinery v0.0.0-20190525184631-5f46317e436b // indirect
+	github.com/likexian/gokit v0.25.15 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240226150601-1dcf7310316a // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
