@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/influxdata/telegraf/config"
 	"github.com/influxdata/telegraf/internal/choice"
 	"github.com/influxdata/telegraf/plugins/inputs"
+	"golang.org/x/net/idna"
 )
 
 // TODO: Testler ve Auth metotların eklenmesi gerekiyor (Basic, Bearer, JWT, OAuth2)
@@ -24,7 +26,7 @@ type Uptime struct {
 	Method      string              `toml:"method"`
 	Cookies     []map[string]string `toml:"cookies"`
 	Headers     []map[string]string `toml:"headers"`
-	Params      []map[string]string `toml:"params"`
+	Queries     url.Values          `toml:"queries"`
 	UserAgent   string              `toml:"user_agent"`
 	ContentType string              `toml:"content_type"`
 	Body        string              `toml:"body"`
@@ -71,6 +73,35 @@ func (u *Uptime) Init() error {
 	if u.URL == "" {
 		return fmt.Errorf("url is missing")
 	}
+	parsedURL, err := url.Parse(u.URL)
+	if err != nil {
+		return err
+	}
+	// Http or Https
+	if parsedURL.Scheme == "" {
+		return fmt.Errorf("protocol is missing")
+	}
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return fmt.Errorf("invalid protocol: %s", parsedURL.Scheme)
+	}
+	// Domain
+	if parsedURL.Hostname() == "" {
+		return fmt.Errorf("domain is missing")
+	}
+	// Burada domain parse edilmiyor bunu düzelt
+	// dp, err := tld.Parse(parsedURL.Hostname())
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println(dp.Path)
+	// if dp.Domain == "" {
+	// 	return fmt.Errorf("invalid domain: %s", parsedURL.Host)
+	// }
+	// Check if the domain is valid
+	if _, err := idna.Lookup.ToASCII(parsedURL.Hostname()); err != nil {
+		return fmt.Errorf("invalid domain: %s", parsedURL.Host)
+	}
+
 	if u.Method == "" {
 		u.Method = http.MethodHead
 	}
@@ -79,6 +110,9 @@ func (u *Uptime) Init() error {
 	}
 	if err := choice.Check(u.ContentType, types); err != nil {
 		return err
+	}
+	if len(u.Queries) == 0 {
+		u.Queries = parsedURL.Query()
 	}
 	if u.UserAgent == "" {
 		u.UserAgent = "Telegraf"
@@ -147,15 +181,16 @@ func (u *Uptime) gohttp() (*uptimeStats, error) {
 		}
 	}
 	// Add Params
-	if len(u.Params) > 0 {
-		q := req.URL.Query()
-		for _, param := range u.Params {
-			for key, value := range param {
-				q.Add(key, value)
-			}
-		}
-		req.URL.RawQuery = q.Encode()
-	}
+	req.URL.RawQuery = u.Queries.Encode()
+	// if len(u.Params) > 0 {
+	// 	q := req.URL.Query()
+	// 	for _, param := range u.Params {
+	// 		for key, value := range param {
+	// 			q.Add(key, value)
+	// 		}
+	// 	}
+	// 	req.URL.RawQuery = q.Encode()
+	// }
 	// Add User-Agent
 	if u.UserAgent != "" {
 		req.Header.Add("User-Agent", u.UserAgent)
